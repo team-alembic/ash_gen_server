@@ -24,7 +24,36 @@ defmodule AshGenServer.DataLayer do
     process in sequence.
   """
 
-  use Ash.Dsl.Extension, transformers: [], sections: []
+  @gen_server %Ash.Dsl.Section{
+    name: :gen_server,
+    describe: """
+    Configuration for the underlying GenServer process.
+    """,
+    examples: [
+      """
+      gen_server do
+        inactivity_timeout :timer.minutes(5)
+        maximum_lifetime :timer.minutes(120)
+      end
+      """
+    ],
+    schema: [
+      inactivity_timeout: [
+        type: :timeout,
+        default: :infinity,
+        doc:
+          "How long to wait before destroying the resource when it is inactive (in milliseconds). Defaults to `:infinity`."
+      ],
+      maxmum_lifetime: [
+        type: :timeout,
+        default: :infinity,
+        doc:
+          "The maximum amount of time that the process can run (in milliseconds). Defaults to `:infinity`."
+      ]
+    ]
+  }
+
+  use Ash.Dsl.Extension, transformers: [], sections: [@gen_server]
   alias Ash.{Actions, Api, Changeset, DataLayer, Filter, Resource, Sort}
   alias AshGenServer.{Query, Registry, Server, Supervisor}
   @behaviour Ash.DataLayer

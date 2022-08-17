@@ -5,15 +5,20 @@ defmodule AshGenServer.Server do
   This module is a `GenServer` which can create, read and update a single
   resource stored within it's state by applying changesets.
   """
-  defstruct ~w[primary_key resource record]a
-  alias Ash.{Changeset, Resource}
+  defstruct ~w[primary_key resource record inactivity_timeout maximum_lifetime inactivity_timer lifetime_timer api]a
+  alias Ash.{Changeset, Dsl.Extension, Resource}
   alias AshGenServer.Registry
-  use GenServer
+  use GenServer, restart: :transient
 
   @type t :: %__MODULE__{
+          api: module,
           primary_key: Registry.primary_key(),
           resource: Resource.t(),
-          record: Resource.record()
+          record: Resource.record(),
+          inactivity_timeout: pos_integer() | :infinity,
+          maximum_lifetime: pos_integer() | :infinity,
+          inactivity_timer: nil | reference,
+          lifetime_timer: nil | reference
         }
 
   @doc false
@@ -43,7 +48,22 @@ defmodule AshGenServer.Server do
     with {:ok, _self} <- Registry.register({resource, primary_key}),
          {:ok, record} <- Changeset.apply_attributes(changeset) do
       record = unload_relationships(resource, record)
-      {:ok, %__MODULE__{primary_key: primary_key, resource: resource, record: record}}
+      inactivity_timeout = get_config(resource, :inactivity_timeout, :infinity)
+      maximum_lifetime = get_config(resource, :maximum_lifetime, :infinity)
+
+      state =
+        %__MODULE__{
+          api: changeset.api,
+          primary_key: primary_key,
+          resource: resource,
+          record: record,
+          inactivity_timeout: inactivity_timeout,
+          maximum_lifetime: maximum_lifetime
+        }
+        |> maybe_set_inactivity_timer()
+        |> maybe_set_lifetime_timer()
+
+      {:ok, state}
     else
       {:error, {:already_registered, _}} -> {:stop, :already_exists}
       {:error, reason} -> {:error, reason}
@@ -54,9 +74,15 @@ defmodule AshGenServer.Server do
   @impl true
   @spec handle_call(:get | {:update, Resource.t(), Changeset.t()}, GenServer.from(), t) ::
           {:reply, {:ok, Resource.record()} | {:error, any}, t}
-  def handle_call(:get, _from, state), do: {:reply, {:ok, state.record}, state}
+  def handle_call(:get, _from, state) do
+    state = maybe_set_inactivity_timer(state)
+
+    {:reply, {:ok, state.record}, state}
+  end
 
   def handle_call({:update, resource, changeset}, _from, state) when state.resource == resource do
+    state = maybe_set_inactivity_timer(state)
+
     case Changeset.apply_attributes(changeset) do
       {:ok, new_record} ->
         primary_key_fields = state.resource |> Resource.Info.primary_key()
@@ -81,6 +107,20 @@ defmodule AshGenServer.Server do
   def handle_call({:update, resource, _changeset}, _from, state),
     do: {:reply, {:error, {:incorrect_resource, resource}}, state}
 
+  @doc false
+  @impl true
+  @spec handle_info(:inactivity_timeout | :lifetime_timeout, t) ::
+          {:noreply, t()} | {:stop, :normal, t()}
+  def handle_info(msg, state) when msg in ~w[inactivity_timeout lifetime_timeout]a do
+    with %{name: action_name} <- Resource.Info.primary_action(state.resource, :destroy),
+         changeset <- Changeset.for_destroy(state.record, action_name),
+         :ok <- state.api.destroy(changeset, return_destroyed?: false) do
+      {:noreply, state}
+    else
+      _ -> {:stop, :normal, state}
+    end
+  end
+
   defp primary_key_from_resource_and_changeset(resource, changeset) do
     resource
     |> Resource.Info.primary_key()
@@ -96,4 +136,22 @@ defmodule AshGenServer.Server do
       Map.put(record, relationship.name, Map.get(empty, relationship.name))
     end)
   end
+
+  defp get_config(resource, attr, default),
+    do: Extension.get_opt(resource, [:gen_server], attr, default)
+
+  defp maybe_set_inactivity_timer(%{inactivity_timeout: :infinity} = state), do: state
+
+  defp maybe_set_inactivity_timer(%{inactivity_timeout: ttl, inactivity_timer: nil} = state),
+    do: %{state | inactivity_timer: Process.send_after(self(), :inactivity_timeout, ttl)}
+
+  defp maybe_set_inactivity_timer(%{inactivity_timer: timer} = state) do
+    Process.cancel_timer(timer)
+    maybe_set_inactivity_timer(%{state | inactivity_timer: nil})
+  end
+
+  defp maybe_set_lifetime_timer(%{maximum_lifetime: :infinity} = state), do: state
+
+  defp maybe_set_lifetime_timer(%{maximum_lifetime: ttl} = state),
+    do: %{state | lifetime_timer: Process.send_after(self(), :lifetime_timeout, ttl)}
 end

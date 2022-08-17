@@ -1,9 +1,6 @@
 %Doctor.Config{
-  ignore_modules: [
-    Inspect.TimeTravel.Character,
-    Inspect.TimeTravel.Machine
-  ],
-  ignore_paths: [],
+  ignore_modules: [~r/^Inspect./],
+  ignore_paths: [~r/deps/],
   min_module_doc_coverage: 40,
   min_module_spec_coverage: 0,
   min_overall_doc_coverage: 50,
