@@ -44,7 +44,7 @@ defmodule AshGenServer.DataLayer do
         doc:
           "How long to wait before destroying the resource when it is inactive (in milliseconds). Defaults to `:infinity`."
       ],
-      maxmum_lifetime: [
+      maximum_lifetime: [
         type: :timeout,
         default: :infinity,
         doc:
