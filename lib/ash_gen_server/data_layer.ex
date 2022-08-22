@@ -157,6 +157,7 @@ defmodule AshGenServer.DataLayer do
       |> maybe_apply(query.sort, &Actions.Sort.runtime_sort(Enum.to_list(&1), query.sort))
       |> maybe_apply(query.offset, &Stream.drop(&1, query.offset))
       |> maybe_apply(query.limit, &Stream.take(&1, query.limit))
+      |> Enum.to_list()
 
     {:ok, result}
   end
