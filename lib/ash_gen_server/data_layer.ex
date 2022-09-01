@@ -67,6 +67,7 @@ defmodule AshGenServer.DataLayer do
   def can?(_, :update), do: true
   def can?(_, :destroy), do: true
   def can?(_, :filter), do: true
+  def can?(_, :limit), do: true
   def can?(_, :boolean_filter), do: true
   def can?(_, :nested_expressions), do: true
   def can?(_, {:filter_expr, _}), do: true
