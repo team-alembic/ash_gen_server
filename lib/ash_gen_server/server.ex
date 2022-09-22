@@ -6,8 +6,9 @@ defmodule AshGenServer.Server do
   resource stored within it's state by applying changesets.
   """
   defstruct ~w[primary_key resource record inactivity_timeout maximum_lifetime inactivity_timer lifetime_timer api]a
-  alias Ash.{Changeset, Dsl.Extension, Resource}
+  alias Ash.{Changeset, Resource}
   alias AshGenServer.Registry
+  alias Spark.Dsl.Extension
   use GenServer, restart: :transient
 
   @type t :: %__MODULE__{

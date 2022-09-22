@@ -24,7 +24,7 @@ defmodule AshGenServer.DataLayer do
     process in sequence.
   """
 
-  @gen_server %Ash.Dsl.Section{
+  @gen_server %Spark.Dsl.Section{
     name: :gen_server,
     describe: """
     Configuration for the underlying GenServer process.
@@ -53,7 +53,7 @@ defmodule AshGenServer.DataLayer do
     ]
   }
 
-  use Ash.Dsl.Extension, transformers: [], sections: [@gen_server]
+  use Spark.Dsl.Extension, transformers: [], sections: [@gen_server]
   alias Ash.{Actions, Api, Changeset, DataLayer, Filter, Resource, Sort}
   alias AshGenServer.{Query, Registry, Server, Supervisor}
   @behaviour Ash.DataLayer
