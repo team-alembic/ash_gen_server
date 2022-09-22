@@ -2,6 +2,17 @@ defmodule TimeTravel.Machine do
   @moduledoc false
   use Ash.Resource, data_layer: AshGenServer.DataLayer
 
+  @type t :: %__MODULE__{
+          id: Ecto.UUID.t(),
+          name: String.t(),
+          model: String.t(),
+          manufacturer: String.t(),
+          power_source: String.t(),
+          has_power?: boolean,
+          created_at: NaiveDateTime.t(),
+          updated_at: NaiveDateTime.t()
+        }
+
   actions do
     create :create
 

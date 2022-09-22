@@ -2,6 +2,15 @@ defmodule TimeTravel.Character do
   @moduledoc false
   use Ash.Resource, data_layer: AshGenServer.DataLayer
 
+  @type t :: %__MODULE__{
+          id: Ecto.UUID.t(),
+          name: String.t(),
+          nickname: String.t(),
+          current_year: integer,
+          created_at: NaiveDateTime.t(),
+          updated_at: NaiveDateTime.t()
+        }
+
   actions do
     create :create
 
