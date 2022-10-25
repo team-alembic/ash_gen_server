@@ -42,7 +42,7 @@ defmodule AshGenServer.Server do
 
   @doc false
   @impl true
-  @spec init(list) :: {:ok, t} | {:error, any}
+  @spec init(list) :: {:ok, t} | {:stop, {:error, any}}
   def init([resource, changeset]) do
     primary_key = primary_key_from_resource_and_changeset(resource, changeset)
 
@@ -67,7 +67,7 @@ defmodule AshGenServer.Server do
       {:ok, state}
     else
       {:error, {:already_registered, _}} -> {:stop, :already_exists}
-      {:error, reason} -> {:error, reason}
+      {:error, reason} -> {:stop, {:error, reason}}
     end
   end
 

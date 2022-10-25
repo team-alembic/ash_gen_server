@@ -14,7 +14,7 @@ defmodule AshGenServer.Registry do
 
   This is the key that's actually stored in the Registry.
   """
-  @type resource_key :: {Ash.resource(), primary_key}
+  @type resource_key :: {Ash.Resource.t(), primary_key}
 
   @typedoc """
   A map containing the primary key field(s) and value(s) for a the resource.
@@ -51,7 +51,7 @@ defmodule AshGenServer.Registry do
   @doc """
   Find all the processes registered to the provided resource.
   """
-  @spec find_servers_by_resource(Ash.resource()) :: [{primary_key, pid}]
+  @spec find_servers_by_resource(Ash.Resource.t()) :: [{primary_key, pid}]
   def find_servers_by_resource(resource) do
     Registry.select(__MODULE__, [
       {

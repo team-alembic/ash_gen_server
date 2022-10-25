@@ -5,6 +5,6 @@ defmodule TimeTravel do
   use Ash.Api, otp_app: :ash_gen_server
 
   resources do
-    registry TimeTravel.Registry
+    registry(TimeTravel.Registry)
   end
 end

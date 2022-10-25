@@ -12,29 +12,29 @@ defmodule TimeTravel.Character do
         }
 
   actions do
-    create :create
+    create(:create)
 
     read :read do
-      primary? true
+      primary?(true)
     end
 
-    destroy :destroy
+    destroy(:destroy)
 
     update :travel_in_time do
-      argument :target_year, :integer, allow_nil?: false
+      argument(:target_year, :integer, allow_nil?: false)
 
-      change TimeTravel.CharacterTravelChange
+      change(TimeTravel.CharacterTravelChange)
     end
   end
 
   attributes do
-    uuid_primary_key :id
+    uuid_primary_key(:id)
 
-    attribute :name, :string, allow_nil?: false
-    attribute :nickname, :string
-    attribute :current_year, :integer, allow_nil?: false
+    attribute(:name, :string, allow_nil?: false)
+    attribute(:nickname, :string)
+    attribute(:current_year, :integer, allow_nil?: false)
 
-    create_timestamp :created_at
-    update_timestamp :updated_at
+    create_timestamp(:created_at)
+    update_timestamp(:updated_at)
   end
 end

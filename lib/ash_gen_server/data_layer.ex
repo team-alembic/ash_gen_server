@@ -6,27 +6,27 @@ defmodule AshGenServer.DataLayer do
   `Ash.DataLayer.Ets`.
 
   ## Caveats
-  
+
   * When a resource using this datalayer is created it spawns an instance of
     `AshGenServer.Server` and performs all operations on the data within it.
     This means that your actions must pay the price of a `GenServer.call/3` to
     read or modify the data.
-    
+
   * When destroying a resource it's process is terminated and it's internal
     state is lost.
-    
+
   * If, for some reason, the `AshGenServer.Server` process crashes or exits for
     an abnormal reason the supervisor will restart it **with the changeset used
     by the `create` action** - this means that any updates performed since
     creation will be lost.
-    
+
   * Any resource using this data source **must** have at least one primary key
     field.
-    
+
   * Retrieving a resource by primary key is an optimised case, but any other
     queries will pay the price of having to query every `AshGenServer.Server`
     process in sequence.
-    
+
   """
 
   @gen_server %Spark.Dsl.Section{
@@ -85,7 +85,7 @@ defmodule AshGenServer.DataLayer do
 
   @doc false
   @impl true
-  @spec filter(Query.t(), Filter.t(), Resource.t()) :: Query.t()
+  @spec filter(Query.t(), Filter.t(), Resource.t()) :: {:ok, Query.t()}
   def filter(%{resource: resource, filter: nil} = query, filter, resource),
     do: {:ok, %{query | filter: filter}}
 
@@ -96,23 +96,23 @@ defmodule AshGenServer.DataLayer do
 
   @doc false
   @impl true
-  @spec limit(Query.t(), limit, Resource.t()) :: Query.t() when limit: non_neg_integer()
+  @spec limit(Query.t(), limit, Resource.t()) :: {:ok, Query.t()} when limit: non_neg_integer()
   def limit(%{resource: resource} = query, limit, resource), do: {:ok, %{query | limit: limit}}
 
   @doc false
   @impl true
-  @spec offset(Query.t(), offset, Resource.t()) :: Query.t() when offset: non_neg_integer()
+  @spec offset(Query.t(), offset, Resource.t()) :: {:ok, Query.t()} when offset: non_neg_integer()
   def offset(%{resource: resource} = query, offset, resource),
     do: {:ok, %{query | offset: offset}}
 
   @doc false
   @impl true
-  @spec sort(Query.t(), Sort.t(), Resource.t()) :: Query.t()
+  @spec sort(Query.t(), Sort.t(), Resource.t()) :: {:ok, Query.t()}
   def sort(%{resource: resource} = query, sort, resource), do: {:ok, %{query | sort: sort}}
 
   @doc false
   @impl true
-  @spec run_query(Query.t(), Resource.t()) :: {:ok, Enum.t(Resource.t())} | {:error, any}
+  @spec run_query(Query.t(), Resource.t()) :: {:ok, [Resource.record()]} | {:error, any}
   def run_query(%Query{resource: resource, filter: nil} = query, resource),
     do: do_slow_query(query, resource)
 

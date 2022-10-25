@@ -3,7 +3,7 @@ defmodule TimeTravel.Registry do
   use Ash.Registry, extensions: [Ash.Registry.ResourceValidations]
 
   entries do
-    entry TimeTravel.Character
-    entry TimeTravel.Machine
+    entry(TimeTravel.Character)
+    entry(TimeTravel.Machine)
   end
 end

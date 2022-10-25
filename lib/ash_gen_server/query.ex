@@ -6,10 +6,10 @@ defmodule AshGenServer.Query do
 
   @type t :: %__MODULE__{
           resource: Ash.Resource.t(),
-          filter: Ash.Filter.t(),
+          filter: nil | Ash.Filter.t(),
           api: Ash.Api.t(),
-          limit: non_neg_integer(),
-          offset: non_neg_integer(),
-          sort: Ash.Sort.t()
+          limit: nil | non_neg_integer(),
+          offset: nil | non_neg_integer(),
+          sort: nil | Ash.Sort.t()
         }
 end

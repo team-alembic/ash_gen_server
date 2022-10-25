@@ -1,8 +1,8 @@
 [
-  import_deps: [:ash],
+  import_deps: [:spark],
   inputs: [
     "*.{ex,exs}",
     "{config,lib,test}/**/*.{ex,exs}"
   ],
-  plugins: [Ash.ResourceFormatter]
+  plugins: [Spark.Formatter]
 ]
