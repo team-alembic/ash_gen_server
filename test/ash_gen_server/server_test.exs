@@ -38,4 +38,17 @@ defmodule AshGenServer.ServerTest do
       refute state.record.nickname
     end
   end
+
+  describe "handle_info/3" do
+    test "when send :keep_alive to server resets inactivity timer" do
+      changeset =
+        TimeTravel.Character
+        |> Changeset.for_create(:create, %{name: "Biff Tannen", current_year: 2015})
+
+      {:ok, old_state} = Server.init([TimeTravel.Character, changeset])
+      {:noreply, new_state} = Server.handle_info(:keep_alive, old_state)
+
+      refute old_state.inactivity_timer == new_state.inactivity_timer
+    end
+  end
 end

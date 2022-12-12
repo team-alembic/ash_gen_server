@@ -37,4 +37,8 @@ defmodule TimeTravel.Character do
     create_timestamp(:created_at)
     update_timestamp(:updated_at)
   end
+
+  gen_server do
+    inactivity_timeout(:timer.minutes(1))
+  end
 end
