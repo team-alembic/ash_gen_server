@@ -122,6 +122,10 @@ defmodule AshGenServer.Server do
     end
   end
 
+  def handle_info(:keep_alive, state) do
+    {:noreply, maybe_set_inactivity_timer(state)}
+  end
+
   defp primary_key_from_resource_and_changeset(resource, changeset) do
     resource
     |> Resource.Info.primary_key()
