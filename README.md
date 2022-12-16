@@ -42,7 +42,7 @@ by adding `ash_gen_server` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:ash_gen_server, "~> 0.2.1"}
+    {:ash_gen_server, "~> 0.3.0"}
   ]
 end
 ```
